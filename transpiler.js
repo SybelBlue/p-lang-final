@@ -159,8 +159,6 @@ function evalInContext(js, context) {
     return function() { return eval(js); }.call(context);
 }
 
-function globalFunc() { console.log(arguments); }
-
 let outLines = [];
 function out(...lines) {
   outLines.push(...lines.map(l => l.toString()));
@@ -183,12 +181,11 @@ let testDocument = String.raw`
 \begin{document}
 \begin{proof}
 \begin{${cmdStr}}
-globalFunc("I'm printing!!!");
 [1,"test",4,6,-2].map(n => out(n));
 this.goodbye = function() {
   console.log("bye!");
 }
-var obj = {x: 3};
+var obj = {x: 3, toString: () => "{x: " + obj.x + "}"};
 log("hello", obj);
 \end{${cmdStr}}
 \end{  proof   }
