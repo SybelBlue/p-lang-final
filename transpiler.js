@@ -53,6 +53,7 @@ class ASTNode {
     this.children = [];
     this.data = data;
   }
+
   evaluate() {
     let childEvals = this.children.map(c => c.evaluate()).flat();
     if (!this.data || !this.data.include) return childEvals;
@@ -63,8 +64,10 @@ class ASTNode {
     let outText = outLines.join('\n');
     return [outText.length ?
       outText :
-      String.raw`% I generated nothing at line ${this.data.line}! Try using out().`];
+      String.raw`% I generated nothing at line ${this.data.line}! `
+        + "Try using out()."];
   }
+
   parentScope(includeSelf=false) {
     let parents = [];
     let current = includeSelf ? this : this.parent;
@@ -97,34 +100,25 @@ class TeXInterpreter {
       node.data.region = match[2];
       node.data.evaluable = node.data.region == cmdStr;
       node.data.context = this.context;
-      this.currentNode.children.push(node);
-      this.currentNode = node;
+      node.data.isBegin = true;
     } else if (match = line.match(end("(\\w+)"))) {
-      let last = this.currentNode.data;
       let matchedRegion = match[2];
-      if (last.region != matchedRegion) {
-        console.log(this.currentNode);
-        if (this.currentNode.parentScope().map(p => p.data.region).includes(matchedRegion)) {
-          throw new Error(
-            String.raw`I tried to end the region '${matchedRegion}' at line ` +
-            String.raw`${node.data.line}, but I need to end the region ` +
-            String.raw`'${last.region}' starting at line ${last.line} first!`
-          );
-        } else {
-          throw new Error(
-            String.raw`I tried to end the region '${matchedRegion}' at line ` +
-            String.raw`${node.data.line}, but \begin{${matchedRegion}} was ` +
-            "never called!"
-          );
-        }
+
+      if (this.currentNode.data.region != matchedRegion) {
+        this.throwEarlyEndError(matchedRegion, node);
       }
+
+      node.data.region = matchedRegion;
+      node.data.include = matchedRegion != cmdStr;
+      node.data.isEnd = true;
+
       this.currentNode.data.endLine = this.lineCount;
       this.currentNode = this.currentNode.parent;
-      node.data.include = match[2] != cmdStr;
-      this.currentNode.children.push(node);
-    } else {
-      node.data.text = line;
-      this.currentNode.children.push(node);
+    }
+
+    this.currentNode.children.push(node);
+    if(node.data.isBegin) {
+      this.currentNode = node;
     }
   }
 
@@ -135,6 +129,25 @@ class TeXInterpreter {
       String.raw`'${data.region}' on line ${data.line} was closed!`);
     }
     this.compiledTeX = this.currentNode.evaluate().join('\n');
+  }
+
+  throwEarlyEndError(matchedRegion, node) {
+    let last = this.currentNode.data;
+    if (this.currentNode.parentScope()
+        .map(p => p.data.region).includes(matchedRegion)) {
+      throw new Error(
+        String.raw`I tried to end the region '${matchedRegion}' at line ` +
+        String.raw`${node.data.line}, but I need to end the region ` +
+        String.raw`'${last.region}' starting at line ${last.line} first!`
+      );
+    } else {
+      throw new Error(
+        String.raw`I tried to end the region '${matchedRegion}' at line ` +
+        String.raw`${node.data.line}, but \begin{${matchedRegion}} was ` +
+        "never called! Try putting a begin call between lines " +
+        String.raw`${last.line} and ${node.data.line}.`
+      );
+    }
   }
 }
 
@@ -152,8 +165,12 @@ function out(...lines) {
   outLines.push(...lines.map(l => l.toString()));
 }
 
-function array() {
-
+function array(table, alignment=null) {
+  out(
+String.raw`$$\begin{array}{${alignment || " " + "c ".repeat(table[0].length)}}
+${table.map(row => row.join(" & ")).join(" \\\\ \n")}
+\end{array}$$`
+  )
 }
 
 let testDocument = String.raw`
@@ -171,6 +188,11 @@ this.goodbye = function() {
 console.log(this);
 this.goodbye();
 \end{${cmdStr}}
+
+\begin{${cmdStr}}
+array([[11,12,13],[21,22,23]])
+\end{${cmdStr}}
+
 \end{document}
 `
 
