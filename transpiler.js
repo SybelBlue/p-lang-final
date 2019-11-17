@@ -18,7 +18,7 @@ String.prototype.includesRegex = function(str) {
 
 function commandStringWithArgument(command, argument) {
   command.enforceValid();
-  return String.raw`(\\${command}\{\s*${argument}\s*\})`
+  return String.raw`(\\${command}(\[\s*\w*\s*\])*\{\s*${argument}\s*\})`
 }
 
 function command(name) {
@@ -98,12 +98,12 @@ class TeXInterpreter {
 
     let match;
     if (match = line.match(begin("(\\w+)"))) {
-      node.data.region = match[2];
+      node.data.region = match[3];
       node.data.evaluable = node.data.region == cmdStr;
       node.data.context = this.context;
       node.data.isBegin = true;
     } else if (match = line.match(end("(\\w+)"))) {
-      let matchedRegion = match[2];
+      let matchedRegion = match[3];
 
       if (this.currentNode.data.region != matchedRegion) {
         this.throwEarlyEndError(matchedRegion, node);
@@ -196,7 +196,7 @@ log("hello", obj);
 console.log(this);
 this.goodbye();
 \end{${cmdStr}}
-
+\command[optional  ]{ and stuff }
 \begin{${cmdStr}}
 array([[11,12,13],[21,22,23]])
 \end{${cmdStr}}
