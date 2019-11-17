@@ -52,26 +52,36 @@ class ASTNode {
     this.parent = parent;
     this.children = [];
     this.data = data;
-    // this.context = new EvalContext();
   }
   evaluate() {
-    var childEvals = this.children.map(c => c.evaluate()).flat();
+    let childEvals = this.children.map(c => c.evaluate()).flat();
     if (!this.data || !this.data.include) return childEvals;
     if (!this.data.evaluable) return [this.data.text, ...childEvals];
     // this.context.clear();
     outLines = [];
     evalInContext(childEvals.join('\n'), this.data.context);
-    return [outLines.join('\n')];
+    let outText = outLines.join('\n');
+    return [outText.length ?
+      outText :
+      String.raw`% I generated nothing at line ${this.data.line}! Try using out().`];
+  }
+  parentScope(includeSelf=false) {
+    let parents = [];
+    let current = includeSelf ? this : this.parent;
+    while (current) {
+      parents.push(current);
+      current = current.parent;
+    }
+    return parents;
   }
 }
 
 class TeXInterpreter {
   constructor() {
-    this.currentNode = new ASTNode(null, null);
-    this.lineCount = 0;
+    this.currentNode = new ASTNode(null, {line: 0, include: false});
+    this.lineCount = 1;
     this.context = {
-      out: out,
-
+      out: out
     };
   }
 
@@ -91,8 +101,22 @@ class TeXInterpreter {
       this.currentNode = node;
     } else if (match = line.match(end("(\\w+)"))) {
       let last = this.currentNode.data;
-      if (last.region != match[2]) {
-        throw new Error("Illegal End of Region " + last.toString());
+      let matchedRegion = match[2];
+      if (last.region != matchedRegion) {
+        console.log(this.currentNode);
+        if (this.currentNode.parentScope().map(p => p.data.region).includes(matchedRegion)) {
+          throw new Error(
+            String.raw`I tried to end the region '${matchedRegion}' at line ` +
+            String.raw`${node.data.line}, but I need to end the region ` +
+            String.raw`'${last.region}' starting at line ${last.line} first!`
+          );
+        } else {
+          throw new Error(
+            String.raw`I tried to end the region '${matchedRegion}' at line ` +
+            String.raw`${node.data.line}, but \begin{${matchedRegion}} was ` +
+            "never called!"
+          );
+        }
       }
       this.currentNode.data.endLine = this.lineCount;
       this.currentNode = this.currentNode.parent;
@@ -105,9 +129,10 @@ class TeXInterpreter {
   }
 
   close() {
-    if (this.currentNode.data) {
+    if (this.currentNode.parent) {
       let data = this.currentNode.data;
-      throw new Error(String.raw`Unclosed Region '${data.region}' on line ${data.line}.`);
+      throw new Error(String.raw`I hit the end of the script before ` +
+      String.raw`'${data.region}' on line ${data.line} was closed!`);
     }
     this.compiledTeX = this.currentNode.evaluate().join('\n');
   }
@@ -127,18 +152,21 @@ function out(...lines) {
   outLines.push(...lines.map(l => l.toString()));
 }
 
+function array() {
+
+}
+
 let testDocument = String.raw`
 \begin{document}
 \begin{proof}
 \begin{${cmdStr}}
 globalFunc("I'm printing!!!");
-out(3);
+[1,"test",4,6,-2].map(n => out(n));
 this.goodbye = function() {
   console.log("bye!");
 }
 \end{${cmdStr}}
 \end{  proof   }
-
 \begin{${cmdStr}}
 console.log(this);
 this.goodbye();
