@@ -18,7 +18,7 @@ String.prototype.includesRegex = function(str) {
 
 function commandStringWithArgument(command, argument) {
   command.enforceValid();
-  return String.raw`(\\${command}(\[\s*\w*\s*\])*\{\s*${argument}\s*\})`
+  return String.raw`(\\${command}(?:\[\s*(\w*)\s*\])*\{\s*${argument}\s*\})`
 }
 
 function command(name) {
@@ -38,6 +38,7 @@ function end(name) {
 Array.prototype.last = function() { return this[this.length - 1]; }
 
 const cmdStr = "TeXjs";
+const moduleStr = "module";
 
 function printASTNode(node, depth=-1) {
   depth < 0 || console.log("   ".repeat(depth), node.data);
@@ -58,13 +59,23 @@ class ASTNode {
     let childEvals = this.children.map(c => c.evaluate()).flat();
     if (!this.data || !this.data.include) return childEvals;
     if (!this.data.evaluable) return [this.data.text, ...childEvals];
-    outLines = [];
+    outLines = this.data.isModule ?
+      [String.raw`% Module at line ${this.data.line} compiled successfully! `] :
+      [];
     evalInContext(childEvals.join('\n'), this.data.context);
     let outText = outLines.join('\n');
-    return [outText.length ?
-      outText :
-      String.raw`% I generated nothing at line ${this.data.line}! `
-        + "Try using out(...) or log(...)."];
+
+    if (this.data.isModule) return [outText];
+
+    if (outText.length) {
+      return [String.raw`% Results of region at line ${this.data.line}: `
+        + '\n' + outText]
+    }
+
+    let warning = String.raw`% I generated nothing at line ${this.data.line}! `
+        + "Try using out(...) or log(...).";
+    console.warn(warning)
+    return [warning];
   }
 
   parentScope(includeSelf=false) {
@@ -98,6 +109,7 @@ class TeXInterpreter {
 
     let match;
     if (match = line.match(begin("(\\w+)"))) {
+      node.data.isModule = moduleStr == match[2];
       node.data.region = match[3];
       node.data.evaluable = node.data.region == cmdStr;
       node.data.context = this.context;
@@ -177,23 +189,35 @@ function log(...any) {
   outLines.push(...any.map(m => "% " + m.toString()));
 }
 
+function $(expr) {
+  out("$" + expr + "$");
+}
+
 let testDocument = String.raw`
 \begin{document}
-\begin{proof}
+\begin[optional  ][  optional1]{proof}
 \begin{${cmdStr}}
+log("hello");
 [1,"test",4,6,-2].map(n => out(n));
 this.goodbye = function() {
   console.log("bye!");
 }
 var obj = {x: 3, toString: () => "{x: " + obj.x + "}"};
-log("hello", obj);
+log(obj);
 \end{${cmdStr}}
 \end{  proof   }
-\begin{${cmdStr}}
+
+\begin[module]{${cmdStr}}
 console.log(this);
 this.goodbye();
 \end{${cmdStr}}
-\command[optional  ]{ and stuff }
+
+\command[optional]{ and stuff }
+
+\begin{${cmdStr}}
+console.log("Doing nothing.")
+\end{${cmdStr}}
+
 \begin{${cmdStr}}
 array([[11,12,13],[21,22,23]])
 \end{${cmdStr}}
@@ -206,6 +230,6 @@ for (var line of testDocument.split('\n')) {
   stack.push(line);
 }
 stack.close();
-console.log(stack);
-printASTNode(stack.currentNode);
+// console.log(stack);
+// printASTNode(stack.currentNode);
 console.log(stack.compiledTeX)
