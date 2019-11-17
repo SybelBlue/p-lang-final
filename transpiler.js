@@ -58,14 +58,13 @@ class ASTNode {
     let childEvals = this.children.map(c => c.evaluate()).flat();
     if (!this.data || !this.data.include) return childEvals;
     if (!this.data.evaluable) return [this.data.text, ...childEvals];
-    // this.context.clear();
     outLines = [];
     evalInContext(childEvals.join('\n'), this.data.context);
     let outText = outLines.join('\n');
     return [outText.length ?
       outText :
       String.raw`% I generated nothing at line ${this.data.line}! `
-        + "Try using out()."];
+        + "Try using out(...) or log(...)."];
   }
 
   parentScope(includeSelf=false) {
@@ -84,6 +83,8 @@ class TeXInterpreter {
     this.currentNode = new ASTNode(null, {line: 0, include: false});
     this.lineCount = 1;
     this.context = {
+      log: log,
+      array: array,
       out: out
     };
   }
@@ -173,6 +174,11 @@ ${table.map(row => row.join(" & ")).join(" \\\\ \n")}
   )
 }
 
+function log(...any) {
+  console.log(...any);
+  outLines.push(...any.map(m => "% " + m.toString()));
+}
+
 let testDocument = String.raw`
 \begin{document}
 \begin{proof}
@@ -182,6 +188,8 @@ globalFunc("I'm printing!!!");
 this.goodbye = function() {
   console.log("bye!");
 }
+var obj = {x: 3};
+log("hello", obj);
 \end{${cmdStr}}
 \end{  proof   }
 \begin{${cmdStr}}
