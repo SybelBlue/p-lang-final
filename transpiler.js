@@ -89,7 +89,7 @@ class ASTNode {
   }
 }
 
-class TeXInterpreter {
+class TeXTranspiler {
   constructor() {
     this.currentNode = new ASTNode(null, {line: 0, include: false});
     this.lineCount = 1;
@@ -98,6 +98,17 @@ class TeXInterpreter {
       array: array,
       out: out
     };
+  }
+
+  compileText(text) {
+    for (var line of text.split('\n')) {
+      this.push(line);
+    }
+    this.close();
+  }
+
+  printCurrentAST() {
+    printASTNode(this.currentNode);
   }
 
   push(line) {
@@ -141,6 +152,10 @@ class TeXInterpreter {
       throw new Error(String.raw`I hit the end of the script before ` +
       String.raw`'${data.region}' on line ${data.line} was closed!`);
     }
+    this.refreshCompiledTeX();
+  }
+
+  refreshCompiledTeX() {
     this.compiledTeX = this.currentNode.evaluate().join('\n');
   }
 
@@ -225,11 +240,9 @@ array([[11,12,13],[21,22,23]])
 \end{document}
 `
 
-let stack = new TeXInterpreter();
-for (var line of testDocument.split('\n')) {
-  stack.push(line);
-}
-stack.close();
-// console.log(stack);
-// printASTNode(stack.currentNode);
-console.log(stack.compiledTeX)
+
+let transpiler = new TeXTranspiler();
+transpiler.compileText(testDocument);
+// console.log(transpiler);
+transpiler.printCurrentAST();
+console.log(transpiler.compiledTeX)
