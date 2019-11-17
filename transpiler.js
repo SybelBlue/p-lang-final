@@ -39,15 +39,11 @@ Array.prototype.last = function() { return this[this.length - 1]; }
 
 const cmdStr = "TeXjs";
 
-
-class Region {
-  constructor(line, region) {
-    this.line = line;
-    this.region = region;
-    this.evaluable = region == cmdStr;
-  }
-  toString() {
-    return String.raw`${this.region} at line ${this.line}`;
+function printASTNode(node, depth=-1) {
+  depth < 0 || console.log("   ".repeat(depth), node.data);
+  if (!node.children.length) return;
+  for (var child of node.children) {
+    printASTNode(child, depth + 1);
   }
 }
 
@@ -56,48 +52,67 @@ class ASTNode {
     this.parent = parent;
     this.children = [];
     this.data = data;
+    // this.context = new EvalContext();
+  }
+  evaluate() {
+    var childEvals = this.children.map(c => c.evaluate()).flat();
+    if (!this.data || !this.data.include) return childEvals;
+    if (!this.data.evaluable) return [this.data.text, ...childEvals];
+    // this.context.clear();
+    outLines = [];
+    evalInContext(childEvals.join('\n'), this.data.context);
+    return [outLines.join('\n')];
   }
 }
 
 class TeXInterpreter {
   constructor() {
-    this.stack = [];
-    this.ast = null;
-    this.text = [];
+    this.currentNode = new ASTNode(null, null);
     this.lineCount = 0;
+    this.context = {
+      out: out,
+
+    };
   }
 
   push(line) {
-    this.lineCount++;
-    this.text.push(line);
+    let node = new ASTNode(this.currentNode, {
+      line: this.lineCount++,
+      text: line,
+      include: true
+    });
+
     let match;
     if (match = line.match(begin("(\\w+)"))) {
-      let region = new Region(this.lineCount, match[2]);
-      this.stack.push(region);
-
+      node.data.region = match[2];
+      node.data.evaluable = node.data.region == cmdStr;
+      node.data.context = this.context;
+      this.currentNode.children.push(node);
+      this.currentNode = node;
     } else if (match = line.match(end("(\\w+)"))) {
-      let last = this.stack.pop();
+      let last = this.currentNode.data;
       if (last.region != match[2]) {
         throw new Error("Illegal End of Region " + last.toString());
       }
-      if (last.evaluable) {
-        let start = last.line;
-        let end = this.lineCount - 1;
-        let evalText = this.text.slice(start, end).join("\n");
-        evalInContext(evalText, this);
-      }
+      this.currentNode.data.endLine = this.lineCount;
+      this.currentNode = this.currentNode.parent;
+      node.data.include = match[2] != cmdStr;
+      this.currentNode.children.push(node);
+    } else {
+      node.data.text = line;
+      this.currentNode.children.push(node);
     }
   }
 
   close() {
-    if (this.stack.length)
-      throw new Error("Unclosed Regions: " + this.stack.map(obj => obj.toString()));
+    if (this.currentNode.data) {
+      let data = this.currentNode.data;
+      throw new Error(String.raw`Unclosed Region '${data.region}' on line ${data.line}.`);
+    }
+    this.compiledTeX = this.currentNode.evaluate().join('\n');
   }
 }
 
-function globalFunc() {
-  console.log(arguments);
-}
 
 // https://stackoverflow.com/questions/8403108/calling-eval-in-particular-context
 function evalInContext(js, context) {
@@ -105,30 +120,31 @@ function evalInContext(js, context) {
     return function() { return eval(js); }.call(context);
 }
 
+function globalFunc() { console.log(arguments); }
+
+let outLines = [];
+function out(...lines) {
+  outLines.push(...lines.map(l => l.toString()));
+}
 
 let testDocument = String.raw`
 \begin{document}
 \begin{proof}
 \begin{${cmdStr}}
 globalFunc("I'm printing!!!");
-this.push("Internal proof");
+out(3);
 this.goodbye = function() {
   console.log("bye!");
-}
-global.hello = function() {
-  console.log("hello world!");
 }
 \end{${cmdStr}}
 \end{  proof   }
 
 \begin{${cmdStr}}
-hello();
+console.log(this);
 this.goodbye();
 \end{${cmdStr}}
 \end{document}
 `
-
-// document.getElementById("main").innerHTML = testDocument;
 
 let stack = new TeXInterpreter();
 for (var line of testDocument.split('\n')) {
@@ -136,5 +152,5 @@ for (var line of testDocument.split('\n')) {
 }
 stack.close();
 console.log(stack);
-
-hello();
+printASTNode(stack.currentNode);
+console.log(stack.compiledTeX)
