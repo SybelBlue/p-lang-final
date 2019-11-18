@@ -59,9 +59,9 @@ function out(...lines) {
 
 function array(table, alignment=null) {
   out(
-String.raw`$$\begin{array}{${alignment || " " + "c ".repeat(table[0].length)}}
+String.raw`\begin{array}{${alignment || " " + "c ".repeat(table[0].length)}}
 ${table.map(row => row.join(" & ")).join(" \\\\ \n")}
-\end{array}$$`
+\end{array}`
   )
 }
 
@@ -76,5 +76,11 @@ function warn(...any) {
 }
 
 function $(expr) {
-  out("$" + expr + "$");
+  if (expr) out("$" + expr + "$")
+  else out("$");
+}
+
+function $$(expr) {
+  if (expr) out("$$" + expr + "$$")
+  else out("$$");
 }

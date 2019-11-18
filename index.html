@@ -30,8 +30,9 @@
 </head>
 
 <body onload="main()" style="background-color:powderblue;">
-  <h1>TeXjs</h1>
-  <div style="margin: 0 auto;">
+  <title>TeXjs</title>
+  <h1 align="center"><i>{TeX}.js</i></h1>
+  <div align="center">
     <textarea id="inputarea" rows="100" cols="80" spellcheck="false"
       onkeyup="reload()" onchange="reload()" style="background-color: #1d3057; color: white;"></textarea>
     <textarea readonly id="outputarea" rows="100" cols="80" spellcheck="false" style="background-color: #511d57; color: white;"></textarea>
@@ -53,7 +54,6 @@
           lastFailed = false;
           output.value = "";
           output.style.backgroundColor = "green";
-          // output.style.color = "white";
           setTimeout(
             function() {
               output.style.backgroundColor = "#511d57";
@@ -70,7 +70,6 @@
         if (!e.makeFancyMessage) throw e;
         output.value = e.makeFancyMessage();
         output.style.backgroundColor = "#ba2f25";
-        // output.style.color = "white";
         output.style.backgroundSize = "0 0";
         lastFailed = true;
       }

@@ -24,7 +24,11 @@ console.log("Doing nothing.");
 \end{${cmdStr}}
 
 \begin{${cmdStr}}
-array([[11,12,13],[21,22,23]])
+array(
+  [1,2].map(i =>
+    [1, 2, 3].map(j => "a_{" + i + "," + j + "}")
+  )
+)
 \end{${cmdStr}}
 
 \end{document}
