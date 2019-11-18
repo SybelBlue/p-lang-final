@@ -1,5 +1,22 @@
 "use strict";
 
+class CompileError extends Error {
+  constructor(message, line, lineNumber) {
+    super(message, "transpiler.js", lineNumber);
+    this.line = line;
+    this.lineNumber = lineNumber;
+  }
+
+  makeFancyMessage() {
+    let m = this.message;
+    let spaceCount = ("" + this.lineNumber).length + 4;
+    m += "\n" + " ".repeat(spaceCount) + " |\n"
+    m += " ".repeat(4) + this.lineNumber + " | " + this.line + "\n"
+    m += " ".repeat(spaceCount) + " | " + "^".repeat(this.line.length);
+    return m;
+  }
+}
+
 class TeXTranspiler {
   constructor() {
     this.currentNode = new ASTNode(null, {line: 0, include: false});
@@ -60,8 +77,9 @@ class TeXTranspiler {
   close() {
     if (this.currentNode.parent) {
       let data = this.currentNode.data;
-      throw new Error(String.raw`I hit the end of the script before ` +
-      String.raw`'${data.region}' on line ${data.line} was closed!`);
+      throw new CompileError(String.raw`I hit the end of the script before ` +
+      String.raw`'${data.region}' on line ${data.line} was closed!`,
+      data.text, data.line);
     }
     this.refreshCompiledTeX();
   }
@@ -74,17 +92,21 @@ class TeXTranspiler {
     let last = this.currentNode.data;
     if (this.currentNode.parentScope()
         .map(p => p.data.region).includes(matchedRegion)) {
-      throw new Error(
+      throw new CompileError(
         String.raw`I tried to end the region '${matchedRegion}' at line ` +
         String.raw`${node.data.line}, but I need to end the region ` +
-        String.raw`'${last.region}' starting at line ${last.line} first!`
+        String.raw`'${last.region}' starting at line ${last.line} first! ` +
+        "Try putting an end call between lines " +
+        String.raw`${last.line} and ${node.data.line}.`,
+        node.data.text, node.data.line
       );
     } else {
-      throw new Error(
+      throw new CompileError(
         String.raw`I tried to end the region '${matchedRegion}' at line ` +
         String.raw`${node.data.line}, but \begin{${matchedRegion}} was ` +
         "never called! Try putting a begin call between lines " +
-        String.raw`${last.line} and ${node.data.line}.`
+        String.raw`${last.line} and ${node.data.line}.`,
+        node.data.text, node.data.line
       );
     }
   }
