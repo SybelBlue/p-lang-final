@@ -70,6 +70,11 @@ function log(...any) {
   outLines.push(...any.map(m => "% " + m.toString()));
 }
 
+function warn(...any) {
+  console.warn(...any);
+  outLines.push(...any.map(m => "% ⚠ " + m.toString()))
+}
+
 function $(expr) {
   out("$" + expr + "$");
 }

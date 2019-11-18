@@ -1,10 +1,11 @@
 "use strict";
 
-class CompileError extends Error {
-  constructor(message, line, lineNumber) {
+class TranspileError extends Error {
+  constructor(message, line, lineNumber, suggestion) {
     super(message, "transpiler.js", lineNumber);
     this.line = line;
     this.lineNumber = lineNumber;
+    this.suggestion = suggestion;
   }
 
   makeFancyMessage() {
@@ -13,6 +14,9 @@ class CompileError extends Error {
     m += "\n" + " ".repeat(spaceCount) + " |\n"
     m += " ".repeat(4) + this.lineNumber + " | " + this.line + "\n"
     m += " ".repeat(spaceCount) + " | " + "^".repeat(this.line.length);
+    if (this.suggestion) {
+      m += "\n  (" + this.suggestion + ")";
+    }
     return m;
   }
 }
@@ -77,7 +81,7 @@ class TeXTranspiler {
   close() {
     if (this.currentNode.parent) {
       let data = this.currentNode.data;
-      throw new CompileError(String.raw`I hit the end of the script before ` +
+      throw new TranspileError(String.raw`I hit the end of the script before ` +
       String.raw`'${data.region}' on line ${data.line} was closed!`,
       data.text, data.line);
     }
@@ -92,21 +96,22 @@ class TeXTranspiler {
     let last = this.currentNode.data;
     if (this.currentNode.parentScope()
         .map(p => p.data.region).includes(matchedRegion)) {
-      throw new CompileError(
+      throw new TranspileError(
         String.raw`I tried to end the region '${matchedRegion}' at line ` +
         String.raw`${node.data.line}, but I need to end the region ` +
-        String.raw`'${last.region}' starting at line ${last.line} first! ` +
+        String.raw`'${last.region}' starting at line ${last.line} first!`,
+        node.data.text, node.data.line,
         "Try putting an end call between lines " +
-        String.raw`${last.line} and ${node.data.line}.`,
-        node.data.text, node.data.line
+        String.raw`${last.line} and ${node.data.line}.`
       );
     } else {
-      throw new CompileError(
+      throw new TranspileError(
         String.raw`I tried to end the region '${matchedRegion}' at line ` +
         String.raw`${node.data.line}, but \begin{${matchedRegion}} was ` +
-        "never called! Try putting a begin call between lines " +
-        String.raw`${last.line} and ${node.data.line}.`,
-        node.data.text, node.data.line
+        "never called!",
+        node.data.text, node.data.line,
+        "Try putting a begin call between lines " +
+        String.raw`${last.line} and ${node.data.line}.`
       );
     }
   }

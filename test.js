@@ -1,5 +1,5 @@
-let testDocument = String.raw`
-\begin{document}
+let testDocument =
+String.raw`\begin{document}
 \begin[optional  ][  optional1]{proof}
 \begin{${cmdStr}}
 log("hello");
@@ -20,7 +20,7 @@ this.goodbye();
 \command[optional]{ and stuff }
 
 \begin{${cmdStr}}
-console.log("Doing nothing.")
+console.log("Doing nothing.");
 \end{${cmdStr}}
 
 \begin{${cmdStr}}
@@ -33,6 +33,6 @@ array([[11,12,13],[21,22,23]])
 
 let transpiler = new TeXTranspiler();
 transpiler.compileText(testDocument);
-// console.log(transpiler);
+console.log(transpiler);
 transpiler.printCurrentAST();
 console.log(transpiler.compiledTeX)

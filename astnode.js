@@ -12,7 +12,16 @@ class ASTNode {
     outLines = this.data.isModule ?
       [String.raw`% Module at line ${this.data.line} compiled successfully! `] :
       [];
-    evalInContext(childEvals.join('\n'), this.data.context);
+    try {
+      evalInContext(childEvals.join('\n'), this.data.context);
+    } catch(e) {
+      console.log(e);
+      throw new TranspileError(
+        String.raw`I couldn't evaluate because an error was thrown:
+        ${e.message}`, this.data.text, this.data.line,
+        "There's something wrong with my internal js code for this region..."
+      );
+    }
     let outText = outLines.join('\n');
 
     if (this.data.isModule) return [outText];
@@ -22,10 +31,10 @@ class ASTNode {
         + '\n' + outText]
     }
 
-    let warning = String.raw`% I generated nothing at line ${this.data.line}! `
-        + "Try using out(...) or log(...).";
-    console.warn(warning)
-    return [warning];
+    let warning = String.raw`I generated nothing at line ${this.data.line}! `
+        + "Try using out(...), log(...), or warn(...).";
+    warn(warning);
+    return outLines;
   }
 
   parentScope(includeSelf=false) {
