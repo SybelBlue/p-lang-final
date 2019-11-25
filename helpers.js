@@ -60,9 +60,13 @@ function out(...lines) {
 function array(table, alignment=null) {
   out(
 String.raw`\begin{array}{${alignment || " " + "c ".repeat(table[0].length)}}
-${table.map(row => row.join(" & ")).join(" \\\\ \n")}
+${tabularString(table)}
 \end{array}`
   )
+}
+
+function tabularString(table) {
+  return table.map(row => row.join(" & ")).join(" \\\\ \n");
 }
 
 function log(...any) {

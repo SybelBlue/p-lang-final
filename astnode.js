@@ -19,7 +19,7 @@ class ASTNode {
       throw new TranspileError(
         String.raw`I couldn't evaluate because an error was thrown:
         ${e.message}`, this.data.text, this.data.line,
-        "There's something wrong with my internal js code for this region..."
+        "Something's wrong with my internal js code for this environment..."
       );
     }
     let outText = outLines.join('\n');
@@ -27,7 +27,7 @@ class ASTNode {
     if (this.data.isModule) return [outText];
 
     if (outText.length) {
-      return [String.raw`% Results of region at line ${this.data.line}: `
+      return [String.raw`% Results of environment at line ${this.data.line}: `
         + '\n' + outText]
     }
 

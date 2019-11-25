@@ -53,19 +53,23 @@ class TeXTranspiler {
     let match;
     if (match = line.match(begin("(\\w+)"))) {
       node.data.isModule = moduleStr == match[2];
-      node.data.region = match[3];
-      node.data.evaluable = node.data.region == cmdStr;
+      node.data.environ = match[3];
+      node.data.evaluable = node.data.environ == cmdStr;
       node.data.context = this.context;
       node.data.isBegin = true;
+      if (line.trim().length != match[0].length) {
+        throw new TranspileError("TeXjs environment markers need to be on " +
+        "their own lines", node.data.text, node.data.line);
+      }
     } else if (match = line.match(end("(\\w+)"))) {
-      let matchedRegion = match[3];
+      let matchedenviron = match[3];
 
-      if (this.currentNode.data.region != matchedRegion) {
-        this.throwEarlyEndError(matchedRegion, node);
+      if (this.currentNode.data.environ != matchedenviron) {
+        this.throwEarlyEndError(matchedenviron, node);
       }
 
-      node.data.region = matchedRegion;
-      node.data.include = matchedRegion != cmdStr;
+      node.data.environ = matchedenviron;
+      node.data.include = matchedenviron != cmdStr;
       node.data.isEnd = true;
 
       this.currentNode.data.endLine = this.lineCount;
@@ -82,7 +86,7 @@ class TeXTranspiler {
     if (this.currentNode.parent) {
       let data = this.currentNode.data;
       throw new TranspileError(String.raw`I hit the end of the script before ` +
-      String.raw`'${data.region}' on line ${data.line} was closed!`,
+      String.raw`'${data.environ}' on line ${data.line} was closed!`,
       data.text, data.line);
     }
     this.refreshCompiledTeX();
@@ -92,22 +96,22 @@ class TeXTranspiler {
     this.compiledTeX = this.currentNode.evaluate().join('\n');
   }
 
-  throwEarlyEndError(matchedRegion, node) {
+  throwEarlyEndError(matchedenviron, node) {
     let last = this.currentNode.data;
     if (this.currentNode.parentScope()
-        .map(p => p.data.region).includes(matchedRegion)) {
+        .map(p => p.data.environ).includes(matchedenviron)) {
       throw new TranspileError(
-        String.raw`I tried to end the region '${matchedRegion}' at line ` +
-        String.raw`${node.data.line}, but I need to end the region ` +
-        String.raw`'${last.region}' starting at line ${last.line} first!`,
+        String.raw`I tried to end the environment '${matchedenviron}' at line ` +
+        String.raw`${node.data.line}, but I need to end the environment ` +
+        String.raw`'${last.environ}' starting at line ${last.line} first!`,
         node.data.text, node.data.line,
         "Try putting an end call between lines " +
         String.raw`${last.line} and ${node.data.line}.`
       );
     } else {
       throw new TranspileError(
-        String.raw`I tried to end the region '${matchedRegion}' at line ` +
-        String.raw`${node.data.line}, but \begin{${matchedRegion}} was ` +
+        String.raw`I tried to end the environment '${matchedenviron}' at line ` +
+        String.raw`${node.data.line}, but \begin{${matchedenviron}} was ` +
         "never called!",
         node.data.text, node.data.line,
         "Try putting a begin call between lines " +
