@@ -31,17 +31,17 @@ function entry(i, j) {
   return "a_{" + i + "," + j + "}";
 }
 array(
-  [1,2,3,4, '\ell'].map(i =>
-    [1, 2, 3,4, 'n'].map(j => entry(i, j))
+  [...range(0, 5), '\ell'].map(i =>
+    [...range(0, 5), 'n'].map(j => entry(i, j))
   )
 )
 \end{TeXjs}
 
 \begin{pmatrix}
 \begin{TeXjs}
-out(tabularString([1,2,3,4, '\ell'].map(sub => ["\\v_" + sub])))
+out(enumerateTabular(5, sub => ["\\v_" + sub]));
 \end{TeXjs}
-\end{pmatrix}
+\end{pmatrix}^T
 
 \end{document}
 `

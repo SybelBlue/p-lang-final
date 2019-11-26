@@ -88,3 +88,15 @@ function $$(expr) {
   if (expr) out("$$" + expr + "$$")
   else out("$$");
 }
+
+function enumerateArray(n, mapFn, alignment=null) {
+  array(range(0, n).map(mapFn), alignment);
+}
+
+function enumerateTabular(n, mapFn) {
+  return tabularString(range(0, n).map(mapFn));
+}
+
+function range(start, stop) {
+  return [...new Array(stop - start).keys()].map(n => n + start);
+}
