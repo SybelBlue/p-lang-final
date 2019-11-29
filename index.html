@@ -3,6 +3,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <script src="lib/codemirror.js"></script>
+  <link link rel="stylesheet" href="lib/codemirror.css">
+  <link link rel="stylesheet" href="theme/cobalt.css">
+  <script src="mode/javascript/javascript.js"></script>
+
   <!-- PLEASE NO CHANGES BELOW THIS LINE (UNTIL I SAY SO) -->
   <script language="javascript" type="text/javascript" src="astnode.js"></script>
   <script language="javascript" type="text/javascript" src="helpers.js"></script>
@@ -13,44 +18,58 @@
   <!-- Credit goes to: Aakash Chakravarthy at
         https://jsfiddle.net/vaakash/5TF5h/ and
         https://www.w3schools.com/css/css3_buttons.asp -->
-  <style media="screen">
+  <style>
+    body {
+      posiition: fixed;
+      overflow: hidden;
+    }
+    html, body {
+      height: 100%;
+    }
+    .CodeMirror {
+      font-size:13px;
+      width:45%;
+      height:85%;
+      text-align: left!important;
+      display: inline-block
+    }
+    .CodeMirror-scroll {height: 100%;}
     textarea{
       -webkit-transition-duration: 0.4s; /* Safari */
       transition-duration: 0.4s;
-      background: url(http://i.imgur.com/2cOaJ.png);
-      background-attachment: local;
-      background-repeat: no-repeat;
-      background-color: #ffffff;
+      /* background: url(http://i.imgur.com/2cOaJ.png); */
+      /* background-attachment: local; */
+      /* background-repeat: no-repeat; */
+      /* background-color: #ffffff; */
       padding-left: 35px;
       padding-top: 10px;
       border-color:#ccc;
       white-space: pre-wrap;
-      height: 90%
+      display: inline-block;
+      height: 85%;
+      width: 45%;
     }
   </style>
 </head>
 
-<body onload="main()" style="background-color:powderblue;">
+<body onload="evaluate()" style="background-color:powderblue;">
   <title>TeXjs</title>
   <h1 align="center"><i>{TeX}.js</i></h1>
   <div align="center">
-    <textarea id="inputarea" cols="80" spellcheck="false"
-      onkeyup="reload()" onchange="reload()" style="background-color: #1d3057; color: white;"></textarea>
+    <textarea id="inputarea" cols="80"></textarea>
     <textarea readonly id="outputarea" cols="80" spellcheck="false" style="background-color: #511d57; color: white;"></textarea>
   </div>
   <script type="text/javascript">
-    function main() {
-      let input = document.getElementById("inputarea");
-      input.appendChild(document.createTextNode(testDocument));
-      reload();
+    function evaluate() {
+      reload(editor.getDoc().getValue());
     }
+
     let lastFailed = true;
-    function reload() {
-      let input = document.getElementById("inputarea");
+    function reload(text) {
       let output = document.getElementById("outputarea");
       let transpiler = new TeXTranspiler();
       try {
-        transpiler.compileText(input.value);
+        transpiler.compileText(text);
         if (lastFailed) {
           lastFailed = false;
           output.value = "";
@@ -75,6 +94,18 @@
         lastFailed = true;
       }
     }
+
+    CodeMirror.defaults.lineNumbers = true;
+    CodeMirror.defaults.lineWiseCopyCut = true;
+
+    var editor = CodeMirror.fromTextArea(document.getElementById("inputarea"), {
+      theme: "cobalt"
+    });
+    editor.on("change", evaluate);
+    editor.doc.setValue(testDocument);
+    editor.doc.clearHistory()
+
+
   </script>
 </body>
 </html>
