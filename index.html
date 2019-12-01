@@ -2,15 +2,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script language="javascript" type="text/javascript" src="helpers.js"></script>
 
   <script src="lib/codemirror.js"></script>
   <link link rel="stylesheet" href="lib/codemirror.css">
   <link link rel="stylesheet" href="theme/cobalt.css">
   <script src="mode/javascript/javascript.js"></script>
+  <script src="mode/stex/stex.js"></script>
 
   <!-- PLEASE NO CHANGES BELOW THIS LINE (UNTIL I SAY SO) -->
   <script language="javascript" type="text/javascript" src="astnode.js"></script>
-  <script language="javascript" type="text/javascript" src="helpers.js"></script>
   <script language="javascript" type="text/javascript" src="transpiler.js"></script>
   <script language="javascript" type="text/javascript" src="test.js"></script>
   <!-- OK, YOU CAN MAKE CHANGES BELOW THIS LINE AGAIN -->
@@ -37,10 +38,6 @@
     textarea{
       -webkit-transition-duration: 0.4s; /* Safari */
       transition-duration: 0.4s;
-      /* background: url(http://i.imgur.com/2cOaJ.png); */
-      /* background-attachment: local; */
-      /* background-repeat: no-repeat; */
-      /* background-color: #ffffff; */
       padding-left: 35px;
       padding-top: 10px;
       border-color:#ccc;
@@ -99,13 +96,12 @@
     CodeMirror.defaults.lineWiseCopyCut = true;
 
     var editor = CodeMirror.fromTextArea(document.getElementById("inputarea"), {
-      theme: "cobalt"
+      theme: "cobalt",
+      mode: "javascript"
     });
     editor.on("change", evaluate);
     editor.doc.setValue(testDocument);
-    editor.doc.clearHistory()
-
-
+    editor.doc.clearHistory();
   </script>
 </body>
 </html>

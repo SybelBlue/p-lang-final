@@ -58,18 +58,23 @@ class TeXTranspiler {
       node.data.context = this.context;
       node.data.isBegin = true;
       if (line.trim().length != match[0].length) {
-        throw new TranspileError("TeXjs environment markers need to be on " +
-        "their own lines", node.data.text, node.data.line);
+        throw new TranspileError(cmdStr + " environment markers need to be " +
+        "on their own lines", node.data.text, node.data.line);
       }
     } else if (match = line.match(end("(\\w+)"))) {
-      let matchedenviron = match[3];
+      let matchedEnviron = match[3];
 
-      if (this.currentNode.data.environ != matchedenviron) {
-        this.throwEarlyEndError(matchedenviron, node);
+      if (matchedEnviron == cmdStr && line.trim().length != match[0].length) {
+        throw new TranspileError(cmdStr + " environment markers need to be " +
+        "on their own lines", node.data.text, node.data.line);
       }
 
-      node.data.environ = matchedenviron;
-      node.data.include = matchedenviron != cmdStr;
+      if (this.currentNode.data.environ != matchedEnviron) {
+        this.throwEarlyEndError(matchedEnviron, node);
+      }
+
+      node.data.environ = matchedEnviron;
+      node.data.include = matchedEnviron != cmdStr;
       node.data.isEnd = true;
 
       this.currentNode.data.endLine = this.lineCount;
@@ -96,12 +101,12 @@ class TeXTranspiler {
     this.compiledTeX = this.currentNode.evaluate().join('\n');
   }
 
-  throwEarlyEndError(matchedenviron, node) {
+  throwEarlyEndError(matchedEnviron, node) {
     let last = this.currentNode.data;
     if (this.currentNode.parentScope()
-        .map(p => p.data.environ).includes(matchedenviron)) {
+        .map(p => p.data.environ).includes(matchedEnviron)) {
       throw new TranspileError(
-        String.raw`I tried to end the environment '${matchedenviron}' at line ` +
+        String.raw`I tried to end the environment '${matchedEnviron}' at line ` +
         String.raw`${node.data.line}, but I need to end the environment ` +
         String.raw`'${last.environ}' starting at line ${last.line} first!`,
         node.data.text, node.data.line,
@@ -110,8 +115,8 @@ class TeXTranspiler {
       );
     } else {
       throw new TranspileError(
-        String.raw`I tried to end the environment '${matchedenviron}' at line ` +
-        String.raw`${node.data.line}, but \begin{${matchedenviron}} was ` +
+        String.raw`I tried to end the environment '${matchedEnviron}' at line ` +
+        String.raw`${node.data.line}, but \begin{${matchedEnviron}} was ` +
         "never called!",
         node.data.text, node.data.line,
         "Try putting a begin call between lines " +
