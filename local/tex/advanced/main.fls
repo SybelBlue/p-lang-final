@@ -1,0 +1,25 @@
+PWD C:/Users/lbcdn/Documents/GitHub Projects/p-lang-final/local/tex/advanced
+INPUT c:/texlive/2019/texmf.cnf
+INPUT c:/texlive/2019/texmf-dist/web2c/texmf.cnf
+INPUT c:/texlive/2019/texmf-var/web2c/pdftex/pdflatex.fmt
+INPUT main.tex
+OUTPUT main.log
+INPUT c:/texlive/2019/texmf-dist/tex/latex/base/article.cls
+INPUT c:/texlive/2019/texmf-dist/tex/latex/base/article.cls
+INPUT c:/texlive/2019/texmf-dist/tex/latex/base/size10.clo
+INPUT c:/texlive/2019/texmf-dist/tex/latex/base/size10.clo
+INPUT c:/texlive/2019/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
+INPUT c:/texlive/2019/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
+INPUT c:/texlive/2019/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+INPUT c:/texlive/2019/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+INPUT c:/texlive/2019/texmf-dist/tex/generic/iftex/ifluatex.sty
+INPUT c:/texlive/2019/texmf-dist/tex/generic/iftex/ifluatex.sty
+INPUT c:/texlive/2019/texmf-dist/tex/generic/iftex/iftex.sty
+INPUT c:/texlive/2019/texmf-dist/tex/generic/iftex/iftex.sty
+INPUT c:/texlive/2019/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+INPUT c:/texlive/2019/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+INPUT c:/texlive/2019/texmf-dist/tex/generic/iftex/ifpdf.sty
+INPUT c:/texlive/2019/texmf-dist/tex/generic/iftex/ifpdf.sty
+INPUT main.aux
+INPUT main.aux
+OUTPUT main.aux

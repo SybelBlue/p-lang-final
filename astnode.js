@@ -1,3 +1,5 @@
+require('./helpers')();
+
 class ASTNode {
   constructor(parent, data) {
     this.parent = parent;
@@ -47,3 +49,5 @@ class ASTNode {
     return parents;
   }
 }
+
+module.exports = function() { this.ASTNode = ASTNode };

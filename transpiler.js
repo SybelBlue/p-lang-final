@@ -1,5 +1,8 @@
 "use strict";
 
+require('./helpers')();
+require('./astnode')();
+
 class TranspileError extends Error {
   constructor(message, line, lineNumber, suggestion) {
     super(message, "transpiler.js", lineNumber);
@@ -30,6 +33,27 @@ class TeXTranspiler {
       array: array,
       out: out
     };
+  }
+
+  compileFile(readPath, writePath) {
+    // https://www.geeksforgeeks.org/javascript-program-to-read-text-file/
+    // Requiring fs module in which
+    // readFile function is defined.
+    const fs = require('fs')
+
+    // Reading data in utf-8 format
+    // which is a type of character set.
+    // Instead of 'utf-8' it can be
+    // other character set also like 'ascii'
+    fs.readFile(readPath, 'utf-8', (err, data) => {
+        if (err) throw err;
+
+        this.compileText(data.toString());
+
+        fs.writeFile(writePath, this.compiledTeX, (err) => {
+          if (err) throw err;
+        })
+    })
   }
 
   compileText(text) {
@@ -125,3 +149,5 @@ class TeXTranspiler {
     }
   }
 }
+
+module.exports = TeXTranspiler;

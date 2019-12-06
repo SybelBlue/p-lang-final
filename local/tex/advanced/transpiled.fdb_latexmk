@@ -1,0 +1,21 @@
+# Fdb version 3
+["pdflatex"] 1575615300 "transpiled.tex" "transpiled.pdf" "transpiled" 1575615301
+  "c:/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb" 1573591830 35752 024fb6c41858982481f6968b5fc26508 ""
+  "c:/texlive/2019/texmf-dist/tex/generic/iftex/ifluatex.sty" 1573596186 492 1994775aa15b0d1289725a0b1bbc2d4c ""
+  "c:/texlive/2019/texmf-dist/tex/generic/iftex/ifpdf.sty" 1573596186 480 5778104efadad304ced77548ca2184b1 ""
+  "c:/texlive/2019/texmf-dist/tex/generic/iftex/iftex.sty" 1573596186 6902 30fdaf7dc5636b8e3afa306210c45cae ""
+  "c:/texlive/2019/texmf-dist/tex/generic/oberdiek/infwarerr.sty" 1573598226 8253 473e0e41f9adadb1977e8631b8f72ea6 ""
+  "c:/texlive/2019/texmf-dist/tex/generic/oberdiek/ltxcmds.sty" 1573598226 18425 5b3c0c59d76fac78978b5558e83c1f36 ""
+  "c:/texlive/2019/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty" 1573598226 20457 7f1b68cac266f44439ba63b922267486 ""
+  "c:/texlive/2019/texmf-dist/tex/latex/base/article.cls" 1573596640 19931 ac2a201ee7969e5fc885f1f0445b10c6 ""
+  "c:/texlive/2019/texmf-dist/tex/latex/base/size10.clo" 1573596641 8446 1f8cadb2c4b2fd1ad8a2d81d1490f997 ""
+  "c:/texlive/2019/texmf-dist/web2c/texmf.cnf" 1573596536 39452 758acee3f2beaeeedff570c5f5d76d98 ""
+  "c:/texlive/2019/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1573601956 4741323 948b3df6bce8014586ddcd31952fa3c4 ""
+  "c:/texlive/2019/texmf-var/web2c/pdftex/pdflatex.fmt" 1573602094 4289887 8b08ce455826ab120890212fa86b65e8 ""
+  "c:/texlive/2019/texmf.cnf" 1573601932 673 4ae7b2f49cee444c5343a45b5d0f169c ""
+  "transpiled.aux" 1575615301 8 a94a2480d3289e625eea47cd1b285758 "pdflatex"
+  "transpiled.tex" 1575615295 531 b26566ac81c782edf92ec6b5645ffb0e ""
+  (generated)
+  "transpiled.aux"
+  "transpiled.pdf"
+  "transpiled.log"

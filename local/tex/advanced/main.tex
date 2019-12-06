@@ -1,0 +1,33 @@
+\documentclass{article}
+\usepackage{pdftexcmds}
+% GOD BLESS https://tex.stackexchange.com/questions/85355/bat-file-execution-from-a-tex-document-during-compilation
+\makeatletter
+\newcommand{\executebat}[1]{%
+  \ifnum\pdf@shellescape=\@ne
+    \immediate\write18{#1}%
+  % \else
+  %   \GenericError{}{Shell escape not enabled}{}
+  %     {You have to run (pdf)LaTeX with the option `-shell-escape'}%
+  \fi
+}
+\makeatother
+\executebat{"shell-script.bat"}
+\begin{document}
+
+\begin{TeXjs}
+function entry(i, j) {
+  if (i == 3 && j == 4) return "\\ddots";
+  if (i == 3) return "\\vdots";
+  if (j == 4) return "\\cdots";
+  return "a_{" + i + "," + j + "}";
+}
+array(
+  [...range(0, 5), '\ell'].map(i =>
+    [...range(0, 5), 'n'].map(j => entry(i, j))
+  )
+)
+\end{TeXjs}
+
+Testing...
+
+\end{document}

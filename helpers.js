@@ -100,3 +100,52 @@ function enumerateTabular(n, mapFn) {
 function range(start, stop) {
   return [...new Array(stop - start).keys()].map(n => n + start);
 }
+
+if (!Array.prototype.flat) {
+  Array.prototype.flat = function() {
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat
+    return this.reduce((acc, val) => acc.concat(val), []);
+  }
+}
+
+module.exports = function() {
+  this.validName = validName;
+
+  this.commandStringWithArgument = commandStringWithArgument;
+
+  this.command = command;
+
+
+  this.begin = begin;
+
+  this.end = end;
+
+  this.cmdStr = "TeXjs";
+  this.moduleStr = "module";
+
+  this.printASTNode = printASTNode;
+
+  this.evalInContext = evalInContext;
+
+  this.out = out;
+
+  this.array = array;
+
+  this.tabularString = tabularString;
+
+  this.log = log;
+
+  this.warn = warn;
+
+  this.$ = $;
+
+  this.$$ = $$;
+
+  this.enumerateArray = enumerateArray;
+
+  this.enumerateTabular = enumerateTabular;
+
+  this.range = range;
+
+  this.outLines = outLines;
+};
