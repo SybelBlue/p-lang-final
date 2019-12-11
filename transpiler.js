@@ -1,5 +1,10 @@
 "use strict";
 
+// arbitrary command
+// \\\w+(\s*\[.+\])*\s*\{(.*)\}
+// command or environment
+const texLiteralRe = /(\\begin\s*(?:\s*\[.*\])*\s*\{(.*?)\}(?:.*?\n?)*?\\end\s*\{\s*\2\s*\})|(\\\w+(?:(?:\s*\[.*\])*\s*\{(?:.*?)\})?)/g;
+
 class TranspileError extends Error {
   constructor(message, line, lineNumber, suggestion) {
     super(message, "transpiler.js", lineNumber);
@@ -10,9 +15,10 @@ class TranspileError extends Error {
 
   makeFancyMessage() {
     let m = this.message;
-    let spaceCount = ("" + this.lineNumber).length + 4;
+    let baseCount = 4;
+    let spaceCount = ("" + this.lineNumber).length + baseCount;
     m += "\n" + " ".repeat(spaceCount) + " |\n"
-    m += " ".repeat(4) + this.lineNumber + " | " + this.line + "\n"
+    m += " ".repeat(baseCount) + this.lineNumber + " | " + this.line + "\n"
     m += " ".repeat(spaceCount) + " | " + "^".repeat(this.line.length);
     if (this.suggestion) {
       m += "\n  (" + this.suggestion + ")";
@@ -106,8 +112,8 @@ class TeXTranspiler {
     if (this.currentNode.parentScope()
         .map(p => p.data.environ).includes(matchedEnviron)) {
       throw new TranspileError(
-        String.raw`I tried to end the environment '${matchedEnviron}' at line ` +
-        String.raw`${node.data.line}, but I need to end the environment ` +
+        String.raw`I tried to end the environment '${matchedEnviron}' at ` +
+        String.raw`line ${node.data.line}, but I need to end the environment ` +
         String.raw`'${last.environ}' starting at line ${last.line} first!`,
         node.data.text, node.data.line,
         "Try putting an end call between lines " +
