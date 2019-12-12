@@ -1,10 +1,5 @@
 "use strict";
 
-// arbitrary command
-// \\\w+(\s*\[.+\])*\s*\{(.*)\}
-// command or environment
-const texLiteralRe = /(\\begin\s*(?:\s*\[.*\])*\s*\{(.*?)\}(?:.*?\n?)*?\\end\s*\{\s*\2\s*\})|(\\\w+(?:(?:\s*\[.*\])*\s*\{(?:.*?)\})?)/g;
-
 class TranspileError extends Error {
   constructor(message, line, lineNumber, suggestion) {
     super(message, "transpiler.js", lineNumber);

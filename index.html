@@ -97,7 +97,7 @@
 
     var editor = CodeMirror.fromTextArea(document.getElementById("inputarea"), {
       theme: "cobalt",
-      mode: "javascript"
+      mode: "stex"
     });
     editor.on("change", evaluate);
     editor.doc.setValue(testDocument);

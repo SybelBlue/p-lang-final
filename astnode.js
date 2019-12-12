@@ -1,3 +1,8 @@
+// arbitrary command
+// \\\w+(\s*\[.+\])*\s*\{(.*)\}
+// command or environment
+const texLiteralRe = /(\\begin\s*(?:\s*\[.*\])*\s*\{(.*?)\}(?:.*?\n?)*?\\end\s*\{\s*\2\s*\})|(\\\w+(?:(?:\s*\[.*\])*\s*\{(?:.*?)\})?)/g;
+
 class ASTNode {
   constructor(parent, data) {
     this.parent = parent;
@@ -13,9 +18,15 @@ class ASTNode {
       [String.raw`% Module at line ${this.data.line} compiled successfully! `] :
       [];
     try {
-      evalInContext(childEvals.join('\n'), this.data.context);
+      let body = childEvals.join('\n');
+      // replace body instances of TeX Literals
+      let newBody = body.replace(texLiteralRe, function(str) {
+        return "String.raw\`" + String.raw`${str}` + "\`";
+      });
+
+      evalInContext(newBody, this.data.context);
     } catch(e) {
-      console.log(e);
+      console.warn(e);
       throw new TranspileError(
         String.raw`I couldn't evaluate because an error was thrown:
         ${e.message}`, this.data.text, this.data.line,

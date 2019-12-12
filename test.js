@@ -25,13 +25,13 @@ console.log("Doing nothing.");
 
 \begin{TeXjs}
 function entry(i, j) {
-  if (i == 3 && j == 4) return "\\ddots";
-  if (i == 3) return "\\vdots";
-  if (j == 4) return "\\cdots";
+  if (i == 3 && j == 4) return \ddots;
+  if (i == 3) return \vdots;
+  if (j == 4) return \cdots;
   return "a_{" + i + "," + j + "}";
 }
 array(
-  [...range(0, 5), '\ell'].map(i =>
+  [...range(0, 5), \ell].map(i =>
     [...range(0, 5), 'n'].map(j => entry(i, j))
   )
 )
@@ -39,7 +39,7 @@ array(
 
 \begin{pmatrix}
 \begin{TeXjs}
-out(enumerateTabular(5, sub => ["\\v_" + sub]));
+out(enumerateTabular(5, sub => [\v_ + sub]));
 \end{TeXjs}
 \end{pmatrix}^T
 
