@@ -1,11 +1,11 @@
 "use strict";
 
 class TranspileError extends Error {
-  constructor(message, line, lineNumber, suggestion) {
+  constructor(message, line, lineNumber, ...suggestions) {
     super(message, "transpiler.js", lineNumber);
     this.line = line;
     this.lineNumber = lineNumber;
-    this.suggestion = suggestion;
+    this.suggestions = suggestions;
   }
 
   makeFancyMessage() {
@@ -15,8 +15,12 @@ class TranspileError extends Error {
     m += "\n" + " ".repeat(spaceCount) + " |\n"
     m += " ".repeat(baseCount) + this.lineNumber + " | " + this.line + "\n"
     m += " ".repeat(spaceCount) + " | " + "^".repeat(this.line.length);
-    if (this.suggestion) {
-      m += "\n  (" + this.suggestion + ")";
+    if (this.suggestions) {
+      for (var suggestion of this.suggestions) {
+        if (suggestion.length) {
+          m += "\n  (" + suggestion + ")";
+        }
+      }
     }
     return m;
   }
@@ -93,7 +97,8 @@ class TeXTranspiler {
       let data = this.currentNode.data;
       throw new TranspileError(String.raw`I hit the end of the script before ` +
       String.raw`'${data.environ}' on line ${data.line} was closed!`,
-      data.text, data.line);
+      data.text, data.line,
+      String.raw`Try putting \end{${data.environ}} call on the last line.`);
     }
     this.refreshCompiledTeX();
   }
@@ -107,9 +112,10 @@ class TeXTranspiler {
     if (this.currentNode.parentScope()
         .map(p => p.data.environ).includes(matchedEnviron)) {
       throw new TranspileError(
-        String.raw`I tried to end the environment '${matchedEnviron}' at ` +
-        String.raw`line ${node.data.line}, but I need to end the environment ` +
-        String.raw`'${last.environ}' starting at line ${last.line} first!`,
+        String.raw`I tried to end the '${matchedEnviron}' environment at ` +
+        String.raw`line ${node.data.line}, but I need to end the ` +
+        String.raw`'${last.environ}' environment starting at line ` +
+        String.raw`${last.line} first!`,
         node.data.text, node.data.line,
         "Try putting an end call between lines " +
         String.raw`${last.line} and ${node.data.line}.`
@@ -121,7 +127,10 @@ class TeXTranspiler {
         "never called!",
         node.data.text, node.data.line,
         "Try putting a begin call between lines " +
-        String.raw`${last.line} and ${node.data.line}.`
+        String.raw`${last.line} and ${node.data.line}.`,
+        node.parent && node.parent.data.environ ?
+          String.raw`Did you mean "${node.parent.data.environ}"?` :
+          ""
       );
     }
   }

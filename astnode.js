@@ -1,7 +1,7 @@
 // arbitrary command
 // \\\w+(\s*\[.+\])*\s*\{(.*)\}
 // command or environment
-const texLiteralRe = /(\\{1}begin\s*(?:\s*\[.*\])*\s*\{(.*?)\}(?:.*?\n?)*?\\end\s*\{\s*\2\s*\})|(\\\w+(?:(?:\s*\[.*\])*\s*((\{(?:.*?)\})|\_)))/g;
+const texLiteralRe = /(\\{1}begin\s*(?:\s*\[.*\])*\s*\{(.*?)\}(?:.*?\n?)*?\\end\s*\{\s*\2\s*\})|(\\\w+(?:(?:\s*\[.*\])*\s*((\{(?:.*?)\})|\_|\^)))/g;
 
 class ASTNode {
   constructor(parent, data) {
